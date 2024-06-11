@@ -1,6 +1,5 @@
 {
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "next build",
     "db:migrate": "tsx app/lib/drizzle/migrate.ts",
