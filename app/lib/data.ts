@@ -26,7 +26,6 @@ export async function fetchRevenue() {
     // await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = await db.select().from(Revenue);
-    console.log("Data fetch completed after 3 seconds.");
 
     const revenues = data.map((item) => {
       return { ...item, revenue: Number(item.revenue) };
@@ -128,9 +127,9 @@ export async function fetchFilteredInvoices(query: string, currentPage: number) 
           ilike(sql`${Invoice.status}::text` as unknown as Column, `%${query}%`)
         )
       )
-      .orderBy(sql`invoices.date DESC`)
-      .limit(ITEMS_PER_PAGE)
-      .offset(offset);
+      .orderBy(sql`invoices.date DESC,invoices.created_at DESC,invoices.id DESC`)
+      .offset(offset)
+      .limit(ITEMS_PER_PAGE);
 
     return invoices;
   } catch (error) {
@@ -180,7 +179,7 @@ export async function fetchInvoiceById(id: string) {
       amount: Number(invoice.amount) / 100,
     }));
 
-    return invoice;
+    return invoice[0];
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch invoice.");
@@ -236,6 +235,36 @@ export async function getUser(email: string) {
     const user = await db.select().from(User).where(eq(User.email, email));
 
     return user[0] as User;
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+    throw new Error("Failed to fetch user.");
+  }
+}
+export async function addInvoice(invoice: any) {
+  try {
+    await db.insert(Invoice).values(invoice);
+
+    return console.log("Create Invoice Successfully.");
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+    throw new Error("Failed to fetch user.");
+  }
+}
+export async function editInvoice(invoice: any, id: string) {
+  try {
+    await db.update(Invoice).set(invoice).where(eq(Invoice.id, id));
+
+    return console.log("Update Invoice Successfully.");
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+    throw new Error("Failed to fetch user.");
+  }
+}
+export async function deleteInvoice(id: string) {
+  try {
+    await db.delete(Invoice).where(eq(Invoice.id, id));
+
+    return console.log("Delete Invoice Successfully.");
   } catch (error) {
     console.error("Failed to fetch user:", error);
     throw new Error("Failed to fetch user.");
